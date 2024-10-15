@@ -35,7 +35,7 @@ public class TransportManagementServiceImpl implements TransportManagementServic
     }
 
     // Method to execute update queries
-    private boolean executeUpdate(String sql, Object... params) {
+    public boolean executeUpdate(String sql, Object... params) {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) {
                 stmt.setObject(i + 1, params[i]);
@@ -87,14 +87,15 @@ public class TransportManagementServiceImpl implements TransportManagementServic
 
     // Trip management methods
     @Override
-    public boolean scheduleTrip(int tripId, int vehicleId, int routeId, String departureDate, String arrivalDate) {
-        String sql = "INSERT INTO Trips (TripID, VehicleID, RouteID, DepartureDate, ArrivalDate) VALUES (?, ?, ?, ?, ?)";
+    public boolean scheduleTrip(int vehicleId, int routeId, String departureDate, String arrivalDate, int maxPassengers) {
+        String sql = "INSERT INTO Trips (VehicleID, RouteID, DepartureDate, ArrivalDate, Tstatus, MaxPassengers) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, tripId);
-            ps.setInt(2, vehicleId);
-            ps.setInt(3, routeId);
-            ps.setString(4, departureDate);
-            ps.setString(5, arrivalDate);
+            ps.setInt(1, vehicleId);
+            ps.setInt(2, routeId);
+            ps.setString(3, departureDate);
+            ps.setString(4, arrivalDate);
+            ps.setString(5, "Scheduled"); // Default status value
+            ps.setInt(6, maxPassengers);   // Include MaxPassengers
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -102,6 +103,8 @@ public class TransportManagementServiceImpl implements TransportManagementServic
             return false;
         }
     }
+
+
 
     @Override
     public boolean cancelTrip(int tripId) {

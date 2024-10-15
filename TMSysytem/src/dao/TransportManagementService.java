@@ -25,7 +25,7 @@ public interface TransportManagementService {
 	boolean deleteRoute(int routeId); // Delete a route
 
 	// Trip management methods
-	boolean scheduleTrip(int tripId, int vehicleId, int routeId, String departureDate, String arrivalDate);
+	boolean scheduleTrip(int vehicleId, int routeId, String departureDate, String arrivalDate, int maxPassengers);
 
 	boolean cancelTrip(int tripId);
 

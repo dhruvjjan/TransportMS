@@ -90,22 +90,27 @@ public class TransportManagementApp {
 				break;
 			case 4:
 				// Schedule a trip
-				System.out.print("Enter vehicle ID: ");
-				tripId = scanner.nextInt();
-				System.out.print("Enter vehicle ID: ");
-				vehicleId = scanner.nextInt();
-				System.out.print("Enter route ID: ");
-				int routeId = scanner.nextInt();
-				System.out.print("Enter departure date: ");
-				String departureDate = scanner.next();
-				System.out.print("Enter arrival date: ");
-				String arrivalDate = scanner.next();
-				if (service.scheduleTrip(tripId, vehicleId, routeId, departureDate, arrivalDate)) {
-					System.out.println("Trip scheduled successfully!");
+				System.out.print("Enter Trip ID: "); // Updated prompt
+				tripId = scanner.nextInt(); // Capture Trip ID
+				System.out.print("Enter Vehicle ID: "); // Correct prompt
+				vehicleId = scanner.nextInt(); // Capture Vehicle ID
+				System.out.print("Enter Route ID: ");
+				int routeId = scanner.nextInt(); // Capture Route ID
+				System.out.print("Enter departure date (yyyy-MM-dd HH:mm:ss): ");
+				String departureDate = scanner.next(); // Capture Departure Date
+				System.out.print("Enter arrival date (yyyy-MM-dd HH:mm:ss): ");
+				String arrivalDate = scanner.next(); // Capture Arrival Date
+				System.out.print("Enter maximum number of passengers: "); // New prompt for MaxPassengers
+				int maxPassengers = scanner.nextInt(); // Capture Max Passengers
+
+				// Schedule the trip with the new parameter
+				if (service.scheduleTrip(vehicleId, routeId, departureDate, arrivalDate, maxPassengers)) {
+				    System.out.println("Trip scheduled successfully!");
 				} else {
-					System.out.println("Failed to schedule trip.");
+				    System.out.println("Failed to schedule trip.");
 				}
 				break;
+
 			case 5:
 				// Cancel a trip
 				System.out.print("Enter trip ID to cancel: ");
