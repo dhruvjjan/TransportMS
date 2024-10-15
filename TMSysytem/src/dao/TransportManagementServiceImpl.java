@@ -1,7 +1,6 @@
 package dao;
 
 import java.sql.Connection;
-
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,206 +10,195 @@ import java.util.List;
 import entity.Trip;
 import entity.Booking;
 import entity.Driver;
-import entity.Route; // Ensure you import the Route entity
+import entity.Route;
 import entity.Vehicle;
 
 public class TransportManagementServiceImpl implements TransportManagementService {
-	private Connection connection;
+    private Connection connection;
 
-	// Constructor to establish the database connection
-	public TransportManagementServiceImpl(String url, String username, String password) {
-		try {
-			// Load the JDBC driver (optional for newer JDBC versions)
-			Class.forName("com.mysql.cj.jdbc.Driver"); // Use appropriate driver class for your DBMS 
+    // Constructor to establish the database connection
+    public TransportManagementServiceImpl(String url, String username, String password) {
+        try {
+            // Load the JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
 
-			// Initialize the connection
-			this.connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/tmsystem?useSSL=false", "root", "root");
-			System.out.println("Database connection established successfully.");
-		} catch (SQLException e) {
-			e.printStackTrace();
-			System.out.println("Failed to establish database connection.");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			System.out.println("JDBC Driver not found.");
-		}
-	}
+            // Initialize the connection
+            this.connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/tmsystem?useSSL=false", "root", "root");
+            System.out.println("Database connection established successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to establish database connection.");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("JDBC Driver not found.");
+        }
+    }
 
-	// Method to execute update queries
-	private boolean executeUpdate(String sql, Object... params) {
-		try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-			for (int i = 0; i < params.length; i++) {
-				stmt.setObject(i + 1, params[i]);
-			}
-			stmt.executeUpdate();
-			return true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+    // Method to execute update queries
+    private boolean executeUpdate(String sql, Object... params) {
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) {
+                stmt.setObject(i + 1, params[i]);
+            }
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-	// Vehicle management methods
-	@Override
-	public boolean addVehicle(Vehicle vehicle) {
-		return executeUpdate("INSERT INTO Vehicle (vehicleId, model, capacity, type, status) VALUES (?, ?, ?, ?, ?)",
-				vehicle.getVehicleId(), vehicle.getModel(), vehicle.getCapacity(), vehicle.getType(),
-				vehicle.getStatus());
-	}
+    // Vehicle management methods
+    @Override
+    public boolean addVehicle(Vehicle vehicle) {
+        return executeUpdate("INSERT INTO Vehicles (VehicleID, Model, Capacity, Vtype, Vstatus) VALUES (?, ?, ?, ?, ?)", 
+                             vehicle.getVehicleId(), vehicle.getModel(), vehicle.getCapacity(), vehicle.getType(), vehicle.getStatus());
+    }
 
-	@Override
-	public boolean updateVehicle(Vehicle vehicle) {
-		return executeUpdate("UPDATE Vehicle SET model = ?, capacity = ?, type = ?, status = ? WHERE vehicleId = ?",
-				vehicle.getModel(), vehicle.getCapacity(), vehicle.getType(), vehicle.getStatus(),
-				vehicle.getVehicleId());
-	}
+    @Override
+    public boolean updateVehicle(Vehicle vehicle) {
+        return executeUpdate("UPDATE Vehicles SET Model = ?, Capacity = ?, Vtype = ?, Vstatus = ? WHERE VehicleID = ?",
+                             vehicle.getModel(), vehicle.getCapacity(), vehicle.getType(), vehicle.getStatus(),
+                             vehicle.getVehicleId());
+    }
 
-	@Override
-	public boolean deleteVehicle(int vehicleId) {
-		return executeUpdate("DELETE FROM Vehicle WHERE vehicleId = ?", vehicleId);
-	}
+    @Override
+    public boolean deleteVehicle(int vehicleId) {
+        return executeUpdate("DELETE FROM Vehicles WHERE VehicleID = ?", vehicleId);
+    }
 
-	// Route management methods
-	@Override
-	public boolean addRoute(Route route) {
-		return executeUpdate(
-				"INSERT INTO Route (routeId, startDestination, endDestination, distance) VALUES (?, ?, ?, ?)",
-				route.getRouteId(), route.getStartDestination(), route.getEndDestination(), route.getDistance());
-	}
+    // Route management methods
+    @Override
+    public boolean addRoute(Route route) {
+        return executeUpdate("INSERT INTO Routes (RouteID, StartDestination, EndDestination, Distance) VALUES (?, ?, ?, ?)",
+                             route.getRouteId(), route.getStartDestination(), route.getEndDestination(), route.getDistance());
+    }
 
-	@Override
-	public boolean updateRoute(Route route) {
-		return executeUpdate(
-				"UPDATE Route SET startDestination = ?, endDestination = ?, distance = ? WHERE routeId = ?",
-				route.getStartDestination(), route.getEndDestination(), route.getDistance(), route.getRouteId());
-	}
+    @Override
+    public boolean updateRoute(Route route) {
+        return executeUpdate("UPDATE Routes SET StartDestination = ?, EndDestination = ?, Distance = ? WHERE RouteID = ?",
+                             route.getStartDestination(), route.getEndDestination(), route.getDistance(), route.getRouteId());
+    }
 
-	@Override
-	public boolean deleteRoute(int routeId) {
-		return executeUpdate("DELETE FROM Route WHERE routeId = ?", routeId);
-	}
+    @Override
+    public boolean deleteRoute(int routeId) {
+        return executeUpdate("DELETE FROM Routes WHERE RouteID = ?", routeId);
+    }
 
-	// Trip management methods
-	@Override
-	public boolean scheduleTrip(int tripId, int vehicleId, int routeId, String departureDate, String arrivalDate) {
-		String sql = "INSERT INTO Trip (tripId, vehicleId, routeId, departureDate, arrivalDate) VALUES (?, ?, ?, ?, ?)";
-		// Now use the sql variable in the PreparedStatement
-		try (PreparedStatement ps = connection.prepareStatement(sql)) {
-			ps.setInt(1, tripId); // Setting tripId
-			ps.setInt(2, vehicleId); // Setting vehicleId
-			ps.setInt(3, routeId); // Setting routeId
-			ps.setString(4, departureDate); // Setting departureDate
-			ps.setString(5, arrivalDate); // Setting arrivalDate
-			ps.executeUpdate(); // Execute the SQL query
-			return true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+    // Trip management methods
+    @Override
+    public boolean scheduleTrip(int tripId, int vehicleId, int routeId, String departureDate, String arrivalDate) {
+        String sql = "INSERT INTO Trips (TripID, VehicleID, RouteID, DepartureDate, ArrivalDate) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, tripId);
+            ps.setInt(2, vehicleId);
+            ps.setInt(3, routeId);
+            ps.setString(4, departureDate);
+            ps.setString(5, arrivalDate);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-	@Override
-	public boolean cancelTrip(int tripId) {
-		return executeUpdate("DELETE FROM Trip WHERE tripId = ?", tripId);
-	}
+    @Override
+    public boolean cancelTrip(int tripId) {
+        return executeUpdate("DELETE FROM Trips WHERE TripID = ?", tripId);
+    }
 
-	// Booking management methods
-	@Override
-	public boolean bookTrip(int bookingId, int tripId, int passengerId, String bookingDate) {
-		String sql = "INSERT INTO Booking (bookingId, tripId, passengerId, bookingDate) VALUES (?, ?, ?, ?)";
+    // Booking management methods
+    @Override
+    public boolean bookTrip(int bookingId, int tripId, int passengerId, String bookingDate) {
+        String sql = "INSERT INTO Bookings (BookingID, TripID, PassengerID, BookingDate) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            ps.setInt(2, tripId);
+            ps.setInt(3, passengerId);
+            ps.setString(4, bookingDate);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-		// SQL statement including bookingId
+    @Override
+    public boolean cancelBooking(int bookingId) {
+        return executeUpdate("DELETE FROM Bookings WHERE BookingID = ?", bookingId);
+    }
 
-		try (PreparedStatement ps = connection.prepareStatement(sql)) {
-			ps.setInt(1, bookingId); // Setting tripId
-			ps.setInt(2, tripId); // Setting vehicleId
-			ps.setInt(3, passengerId); // Setting routeId
-			ps.setString(4, bookingDate); // Setting departureDate
-			// Setting arrivalDate
-			ps.executeUpdate(); // Execute the SQL query
-			return true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+    @Override
+    public boolean allocateDriver(int tripId, int driverId) {
+        String sql = "UPDATE Trips SET DriverID = ? WHERE TripID = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, driverId);  // Corrected driverId and tripId
+            ps.setInt(2, tripId);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-	@Override
-	public boolean cancelBooking(int bookingId) {
-		return executeUpdate("DELETE FROM Booking WHERE bookingId = ?", bookingId);
-	}
+    @Override
+    public boolean deallocateDriver(int tripId) {
+        return executeUpdate("UPDATE Trips SET DriverID = NULL WHERE TripID = ?", tripId);
+    }
 
-	@Override
-	public boolean allocateDriver(int tripId, int driverId) {
-		String sql = "UPDATE Trip SET driverId = ? WHERE tripId = ?";
-		try (PreparedStatement ps = connection.prepareStatement(sql)) {
-			ps.setInt(1, tripId); // Setting tripId
-			ps.setInt(2, driverId); // Setting vehicleId
-			// Setting departureDate
-			// Setting arrivalDate
-			ps.executeUpdate(); // Execute the SQL query
-			return true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+    // Booking retrieval methods
+    @Override
+    public List<Booking> getBookingsByPassenger(int passengerId) {
+        return getBookings("SELECT * FROM Bookings WHERE PassengerID = ?", passengerId);
+    }
 
-	@Override
-	public boolean deallocateDriver(int tripId) {
-		return executeUpdate("UPDATE Trip SET driverId = NULL WHERE tripId = ?", tripId);
-	}
+    @Override
+    public List<Booking> getBookingsByTrip(int tripId) {
+        return getBookings("SELECT * FROM Bookings WHERE TripID = ?", tripId);
+    }
 
-	// Booking retrieval methods
-	@Override
-	public List<Booking> getBookingsByPassenger(int passengerId) {
-		return getBookings("SELECT * FROM Booking WHERE passengerId = ?", passengerId);
-	}
+    private List<Booking> getBookings(String sql, int param) {
+        List<Booking> bookings = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, param);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                bookings.add(new Booking(rs.getInt("BookingID"), rs.getInt("TripID"), rs.getInt("PassengerID"),
+                                         rs.getString("BookingDate")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return bookings;
+    }
 
-	@Override
-	public List<Booking> getBookingsByTrip(int tripId) {
-		return getBookings("SELECT * FROM Booking WHERE tripId = ?", tripId);
-	}
+    // Driver retrieval method
+    @Override
+    public List<Driver> getAvailableDrivers() {
+        List<Driver> drivers = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM Drivers WHERE Available = TRUE")) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                drivers.add(new Driver(rs.getInt("ID"), rs.getString("Name"), rs.getString("LicenseNumber"))); 
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return drivers;
+    }
 
-	private List<Booking> getBookings(String sql, int param) {
-		List<Booking> bookings = new ArrayList<>();
-		try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-			stmt.setInt(1, param);
-			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {
-				bookings.add(new Booking(rs.getInt("bookingId"), rs.getInt("tripId"), rs.getInt("passengerId"),
-						rs.getString("bookingDate")));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return bookings;
-	}
-
-	// Driver retrieval method
-	@Override
-	public List<Driver> getAvailableDrivers() {
-		List<Driver> drivers = new ArrayList<>();
-		try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM Driver WHERE licenseNumber = TRUE")) {
-			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {
-				drivers.add(new Driver(rs.getInt("id"), rs.getString("name"), rs.getString("available"))); 
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return drivers;
-	}
-
-	public void closeConnection() {
-	    if (connection != null) {
-	        try {
-	            connection.close();
-	            System.out.println("Database connection closed successfully.");
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	            System.out.println("Failed to close database connection.");
-	        }
-	    }
-	}
-
+    public void closeConnection() {
+        if (connection != null) {
+            try {
+                connection.close();
+                System.out.println("Database connection closed successfully.");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                System.out.println("Failed to close database connection.");
+            }
+        }
+    }
 }
